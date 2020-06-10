@@ -1,7 +1,7 @@
 const createUserById = (id: number) => ({
   id,
   firstName: `first${id}`,
-  lastName: `last1${id}`
+  lastName: `last${id}`
 });
 
 const people: Person[] = [1, 2, 3].map(createUserById);
@@ -25,6 +25,7 @@ export const server = {
     if (foundIndex > -1) people.splice(foundIndex, 1);
   },
   get: async () => {
+    dataRevalidationCount++;
     console.log(`revalidation was called: ${dataRevalidationCount} times`);
     return people;
   }

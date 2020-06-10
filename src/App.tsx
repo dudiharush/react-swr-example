@@ -1,45 +1,48 @@
 import * as React from "react";
 import "./styles.css";
-import { server, Person, GET_USERS_PATH } from "./server";
-import useSWR, { mutate } from "swr";
+import { server, GET_USERS_PATH } from "./server";
+import { useQuery, useMutation } from "react-query";
 
 const LastPersonFirstName = () => {
-  const { data: people, error } = useSWR(GET_USERS_PATH, server.get);
-  if (error) return <div>failed to load</div>;
-  if (!people) return <div>loading...</div>;
+  const { status, data: people, error } = useQuery(GET_USERS_PATH, server.get);
+  if (status === "error") return <div>failed to load. ${error?.message}</div>;
+  if (status === "loading") return <div>loading...</div>;
   return (
-    <div>last person's first name: {people[people.length - 1].firstName}</div>
+    <div>last person's first name: {people![people!.length - 1].firstName}</div>
   );
 };
 
 const LastPersonLastName = () => {
-  const { data: people, error } = useSWR(GET_USERS_PATH, server.get);
-  if (error) return <div>failed to load</div>;
+  const { status, data: people, error } = useQuery(GET_USERS_PATH, server.get);
+  if (status === 'error') return <div>failed to load. ${error?.message}</div>;
   if (!people) return <div>loading...</div>;
   return (
     <div>last person's last name: {people[people.length - 1].lastName}</div>
   );
 };
+
+const addUserFetcher = ({ id }:{id: number}) => server.addById(id);
+
 const List = () => {
-  const { data: people, error } = useSWR(GET_USERS_PATH, server.get);
+  const { status, data: people, error } = useQuery(GET_USERS_PATH, server.get);
+  const [addUser] = useMutation(addUserFetcher)
+
   const onClick = async () => {
     const nextId = people!.length + 1;
-    mutate(GET_USERS_PATH, async (users: Person[]) => {
-      const user = await server.addById(nextId);
-      return [user, ...users.slice(1)];
-    });
+    addUser({id:nextId})
   };
 
-  if (error) return <div>failed to load</div>;
-  if (!people) return <div>loading...</div>;
+
+  if (status === 'error') return <div>failed to load. ${error?.message}</div>;
+  if (status === 'loading') return <div>loading...</div>;
   return (
     <div className="App">
-      <h1>React SWR</h1>
+      <h1>React and react-query</h1>
       <LastPersonFirstName />
       <LastPersonLastName />
 
-      {people.map(p => (
-        <div>{p.firstName}</div>
+      {people!.map((p,index) => (
+        <div key={index}>{p.firstName}</div>
       ))}
       <button onClick={onClick}>add</button>
     </div>

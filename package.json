@@ -1,14 +1,14 @@
 {
-  "name": "react-swr-example",
+  "name": "react-query-example",
   "version": "1.0.0",
-  "description": "An example usage of react with swr for fetching and caching server side data\n\neach time you click the \"Add\" button, look at the dev-tools console and notice there is only one 'get' call to the server for data revalidation",
+  "description": "An example usage of react with react-query for fetching and caching server side data\n\neach time you click the \"Add\" button, look at the dev-tools console and notice there is only one 'get' call to the server for data revalidation",
   "keywords": [],
   "main": "src/index.tsx",
   "dependencies": {
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
-    "react-scripts": "3.3.0",
-    "swr": "0.2.2"
+    "react-query": "1.5.7",
+    "react-scripts": "3.3.0"
   },
   "devDependencies": {
     "@types/react": "16.9.19",
