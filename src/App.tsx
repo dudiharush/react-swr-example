@@ -1,7 +1,7 @@
 import * as React from "react";
 import "./styles.css";
 import { server, GET_USERS_PATH } from "./server";
-import { useQuery, useMutation } from "react-query";
+import { useQuery, useMutation, queryCache } from "react-query";
 
 const LastPersonFirstName = () => {
   const { status, data: people, error } = useQuery(GET_USERS_PATH, server.get);
@@ -25,7 +25,7 @@ const addUserFetcher = ({ id }:{id: number}) => server.addById(id);
 
 const List = () => {
   const { status, data: people, error } = useQuery(GET_USERS_PATH, server.get);
-  const [addUser] = useMutation(addUserFetcher)
+  const [addUser] = useMutation(addUserFetcher, {onSuccess: ()=> queryCache.refetchQueries(GET_USERS_PATH)})
 
   const onClick = async () => {
     const nextId = people!.length + 1;
