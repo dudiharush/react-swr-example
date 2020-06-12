@@ -1,19 +1,19 @@
 import * as React from "react";
 import "./styles.css";
-import { server, GET_USERS_PATH } from "./server";
-import { useQuery, useMutation, queryCache } from "react-query";
+import { server, GET_USERS_PATH, Person } from "./server";
+import useSWR, { mutate } from "swr";
 import { ee } from "./ee";
 
 const LastPersonFirstName = () => {
-  const { status, data: people, error } = useQuery(GET_USERS_PATH, server.get);
-  if (status === "error") return <div>failed to load. ${error?.message}</div>;
-  if (status === "loading") return <div>loading...</div>;
+  const { data: people, error } = useSWR(GET_USERS_PATH, server.get);
+  if (error) return <div>failed to load. ${error?.message}</div>;
+  if (!people) return <div>loading...</div>;
   return (
-    <div>last person's first name: {people![people!.length - 1].firstName}</div>
+    <div>last person's first name: {people[people.length - 1].firstName}</div>
   );
 };
 
-const Title = () => (<><h1>React and react-query</h1>
+const Title = () => (<><h1>React and swr</h1>
   <hr/></>)
 
 const Log = () => {
@@ -23,34 +23,39 @@ const Log = () => {
 }
 
 const LastPersonLastName = () => {
-  const { status, data: people, error } = useQuery(GET_USERS_PATH, server.get);
-  if (status === 'error') return <div>failed to load. ${error?.message}</div>;
+  const { data: people, error } = useSWR(GET_USERS_PATH, server.get);
+  if (error) return <div>failed to load. ${error?.message}</div>;
   if (!people) return <div>loading...</div>;
   return (
     <div>last person's last name: {people[people.length - 1].lastName}</div>
   );
 };
 
-const addUserFetcher = ({ id }:{id: number}) => server.addById(id);
-
 const List = () => {
-  const { status, data: people, error } = useQuery(GET_USERS_PATH, server.get);
-  const [addUser] = useMutation(addUserFetcher, {onSuccess: ()=> queryCache.refetchQueries(GET_USERS_PATH)})
-
+  const { data: people, error } = useSWR(GET_USERS_PATH, server.get);
   const onClick = async () => {
-    const nextId = people!.length + 1;
-    addUser({id:nextId})
+    
+    mutate(GET_USERS_PATH, async (users: Person[]) => {
+      console.log('users',JSON.stringify(users,null,2))
+      const nextId = users.length + 1;
+      const user = await server.addById(nextId);
+      const n = [...users, user];
+      console.log('users',JSON.stringify(users,null,2))
+
+      return n;
+    });
   };
 
 
-  if (status === 'error') return <div>failed to load. ${error?.message}</div>;
-  if (status === 'loading') return <div>loading...</div>;
+  if (error) return <div>failed to load</div>;	
+  if (!people) return <div>loading...</div>;
+  //console.log('people',JSON.stringify(people,null,2))
   return (
     <>
 
       <LastPersonFirstName />
       <LastPersonLastName />
-
+      
       {people!.map((p,index) => (
         <div key={index}>{p.firstName}</div>
       ))}
