@@ -1,13 +1,17 @@
+import { ee } from "./ee";
+
 const createUserById = (id: number) => ({
   id,
   firstName: `first${id}`,
   lastName: `last${id}`
 });
 
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
 const people: Person[] = [1, 2, 3].map(createUserById);
 export const GET_USERS_PATH = "/api/users";
 
-let dataRevalidationCount = 0;
+let dataRevalidationCount = 1;
 
 export type Person = {
   id: number;
@@ -25,8 +29,14 @@ export const server = {
     if (foundIndex > -1) people.splice(foundIndex, 1);
   },
   get: async () => {
+    await delay(700);
+
+    ee.emit(
+      "revalidate",
+      `revalidation was called: ${dataRevalidationCount} times`
+    );
+
     dataRevalidationCount++;
-    console.log(`revalidation was called: ${dataRevalidationCount} times`);
     return people;
   }
 };
