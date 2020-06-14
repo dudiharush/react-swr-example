@@ -4,8 +4,10 @@ import { server, GET_USERS_PATH, Person } from "./server";
 import useSWR, { mutate } from "swr";
 import { ee } from "./ee";
 
+const peopleFetcher = async () => JSON.parse(await server.get()) as Person[]
+
 const LastPersonFirstName = () => {
-  const { data: people, error } = useSWR(GET_USERS_PATH, server.get);
+  const { data: people, error } = useSWR(GET_USERS_PATH, peopleFetcher);
   if (error) return <div>failed to load. ${error?.message}</div>;
   if (!people) return <div>loading...</div>;
   return (
@@ -23,7 +25,7 @@ const Log = () => {
 }
 
 const LastPersonLastName = () => {
-  const { data: people, error } = useSWR(GET_USERS_PATH, server.get);
+  const { data: people, error } = useSWR(GET_USERS_PATH, peopleFetcher);
   if (error) return <div>failed to load. ${error?.message}</div>;
   if (!people) return <div>loading...</div>;
   return (
@@ -32,17 +34,13 @@ const LastPersonLastName = () => {
 };
 
 const List = () => {
-  const { data: people, error } = useSWR(GET_USERS_PATH, server.get);
+  const { data: people, error } = useSWR(GET_USERS_PATH, peopleFetcher);
   const onClick = async () => {
     
     mutate(GET_USERS_PATH, async (users: Person[]) => {
-      console.log('users',JSON.stringify(users,null,2))
       const nextId = users.length + 1;
       const user = await server.addById(nextId);
-      const n = [...users, user];
-      console.log('users',JSON.stringify(users,null,2))
-
-      return n;
+      return [...users, user];
     });
   };
 
